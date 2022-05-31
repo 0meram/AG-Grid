@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
@@ -7,58 +7,19 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 const App = () => {
   const [gridApi, setGridApi] = useState(null);
   const [gridColumnApi, setGridColumnApi] = useState(null);
-  const [hideColumn, setHideColumn] = useState(true);
+  const [hideColumn, setHideColumn] = useState(false);
 
-  const rowData = useMemo(
-    () => [
-      { type: "Ford", model: "Mondeo", price: 32000, name: "omri", id: 2 },
-      { type: "Porsche", model: "Boxter", price: 72000, name: "yosi", id: 3 },
-      { type: "Toyota", model: "Celica", price: 35000, name: "omer", id: 1 },
-      { type: "Porsche", model: "Kadi", price: 72000, name: "golan", id: 4 },
-      { type: "Porsche", model: "Wlkswagon", price: 72000, name: "nim", id: 5 },
-      { type: "Porsche", model: "Hundai", price: 720, name: "peter", id: 6 },
-      { type: "Porsche", model: "Kaia", price: 980000, name: "yaakov", id: 7 },
-      { type: "Porsche", model: "Mits", price: 72000, name: "fritz", id: 8 },
-    ],
-    []
-  );
+  const cellRenderCurrencyFail = (params) => {
+    return (
+      <div style={{ color: "red" }}>{currencyFormatter(params.value)}</div>
+    );
+  };
 
-  const columns = useMemo(
-    () => ({
-      columnDefs: [
-        {
-          headerName: "User",
-          width: 100,
-          children: [
-            { field: "id", width: 70 },
-            { field: "name", width: 100 },
-          ],
-        },
-        {
-          headerName: "Car",
-          children: [
-            { field: "type", width: 100 },
-            { field: "model", width: 200 },
-          ],
-        },
-        {
-          headerName: "Money",
-          children: [
-            {
-              field: "price",
-              width: 150,
-              hide: true,
-              valueFormatter: currencyFormatter,
-            },
-          ],
-        },
-      ],
-      defaultColDef: {
-        editable: true,
-      },
-    }),
-    []
-  );
+  const cellRenderCurrencyPass = (params) => {
+    return (
+      <div style={{ color: "green" }}>{currencyFormatter(params.value)}</div>
+    );
+  };
 
   function onGridReady(params) {
     setGridApi(params.api);
@@ -71,8 +32,8 @@ const App = () => {
     gridApi.sizeColumnsToFit();
   }
 
-  function currencyFormatter(params) {
-    return formatNumber(params.value) + "$";
+  function currencyFormatter(num) {
+    return formatNumber(num) + "$";
   }
 
   function formatNumber(number) {
@@ -81,10 +42,74 @@ const App = () => {
       .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
   }
 
+  const toggleColumns = useCallback(() => {
+    console.log('🚀 ~ setHideColumn', hideColumn)
+    setHideColumn((prev) => !prev);
+  });
+
+  const rowData = useMemo(
+    () => [
+      { type: "Ford", model: "Mondeo", price: 300, name: "omri", id: 1 },
+      { type: "Porsche", model: "Boxter", price: 72000, name: "yosi", id: 2 },
+      { type: "Toyota", model: "Celica", price: 3500000, name: "omer", id: 3 },
+      { type: "Porsche", model: "Kadi", price: 72000, name: "golan", id: 4 },
+      { type: "Porsche", model: "Wlkswagon", price: 72000, name: "nim", id: 5 },
+      { type: "Porsche", model: "Hundai", price: 720, name: "peter", id: 6 },
+      { type: "Porsche", model: "Kaia", price: 980000, name: "yaakov", id: 7 },
+      { type: "Porsche", model: "Mits", price: 2000, name: "fritz", id: 8 },
+    ],
+    []
+  );
+
+  const columns = useMemo(
+    () => ({
+      columnDefs: [
+        {
+          headerName: "User",
+          width: 350,
+          children: [
+            { field: "id", width: 170 },
+            { field: "name", width: 100 },
+          ],
+        },
+        {
+          headerName: "Car",
+          children: [
+            { field: "type", width: 100 },
+            { field: "model", width: 200, hide: hideColumn },
+          ],
+        },
+        {
+          headerName: "Money",
+          field: "price",
+          width: 250,
+          hide: hideColumn,
+          onCellValueChanged: (e) => {
+            console.log(e.newValue + "$");
+          },
+          editable: (p) => {
+            if (p.data.price > 10000) return true;
+            else return false;
+          },
+          cellRendererSelector: (p) => {
+            if (p.value > 100000) {
+              return { component: cellRenderCurrencyFail };
+            }
+            if (p.value < 10000000) {
+              return { component: cellRenderCurrencyPass };
+            }
+          },
+        },
+      ],
+      defaultColDef: {},
+    }),
+    [hideColumn]
+  );
+
   return (
     <div
       className="ag-theme-alpine"
-      style={{ height: 450, width: 550, margin: 50 }}
+      style={{ height: 450, width: 850, margin: 50 }}
     >
       <h1>MY Grid</h1>
       <AgGridReact
@@ -93,7 +118,7 @@ const App = () => {
         defaultColDef={columns.defaultColDef}
         onGridReady={onGridReady}
       ></AgGridReact>
-      <button onClick={showColumn} style={{ marginTop: 10 }}>
+      <button onClick={toggleColumns} style={{ marginTop: 10 }}>
         {hideColumn ? "show price" : "hide price"}
       </button>
     </div>
