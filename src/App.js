@@ -5,8 +5,6 @@ import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 
 const App = () => {
-  const [gridApi, setGridApi] = useState(null);
-  const [gridColumnApi, setGridColumnApi] = useState(null);
   const [hideColumn, setHideColumn] = useState(false);
 
   const cellRenderCurrencyFail = (params) => {
@@ -21,17 +19,6 @@ const App = () => {
     );
   };
 
-  function onGridReady(params) {
-    setGridApi(params.api);
-    setGridColumnApi(params.columnApi);
-  }
-
-  function showColumn() {
-    gridColumnApi.setColumnVisible("price", hideColumn);
-    setHideColumn(!hideColumn);
-    gridApi.sizeColumnsToFit();
-  }
-
   function currencyFormatter(num) {
     return formatNumber(num) + "$";
   }
@@ -43,7 +30,6 @@ const App = () => {
   }
 
   const toggleColumns = useCallback(() => {
-    console.log('🚀 ~ setHideColumn', hideColumn)
     setHideColumn((prev) => !prev);
   });
 
@@ -109,14 +95,13 @@ const App = () => {
   return (
     <div
       className="ag-theme-alpine"
-      style={{ height: 450, width: 850, margin: 50 }}
+      style={{ height: 450, width: '60%', margin: 50 }}
     >
       <h1>MY Grid</h1>
       <AgGridReact
         rowData={rowData}
         columnDefs={columns.columnDefs}
         defaultColDef={columns.defaultColDef}
-        onGridReady={onGridReady}
       ></AgGridReact>
       <button onClick={toggleColumns} style={{ marginTop: 10 }}>
         {hideColumn ? "show price" : "hide price"}
