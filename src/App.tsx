@@ -1,10 +1,13 @@
 import "./App.css";
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 
-const App = () => {
+let title: String;
+title = "TypeScript Practice";
+
+const App: React.FC = () => {
   const [hideColumn, setHideColumn] = useState(false);
 
   const cellRenderCurrencyFail = (params) => {
@@ -29,9 +32,9 @@ const App = () => {
       .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
   }
 
-  const toggleColumns = useCallback(() => {
+  const toggleColumns = () => {
     setHideColumn((prev) => !prev);
-  });
+  };
 
   const rowData = useMemo(
     () => [
@@ -95,9 +98,10 @@ const App = () => {
   return (
     <div
       className="ag-theme-alpine"
-      style={{ height: 450, width: '60%', margin: 50 }}
+      style={{ height: 450, width: "60%", margin: 50 }}
     >
-      <h1>MY Grid</h1>
+      <h1>MY Grid </h1>
+      <h1>{title}</h1>
       <AgGridReact
         rowData={rowData}
         columnDefs={columns.columnDefs}
