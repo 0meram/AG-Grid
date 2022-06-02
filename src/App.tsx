@@ -7,30 +7,30 @@ import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 let title: String;
 title = "TypeScript Practice";
 
+const cellRenderCurrencyFail = (params) => {
+  return <div style={{ color: "red" }}>{currencyFormatter(params.value)}</div>;
+};
+
+const cellRenderCurrencyPass = (params) => {
+  return (
+    <div style={{ color: "green" }}>{currencyFormatter(params.value)}</div>
+  );
+};
+
+function currencyFormatter(num) {
+  return formatNumber(num) + "$";
+}
+
+function formatNumber(number) {
+  return Math.floor(number)
+    .toString()
+    .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+}
+
+const carsList = ["Kia", "Porsche", "Renault", "Hyundai", "(other)"];
+
 const App: React.FC = () => {
   const [hideColumn, setHideColumn] = useState(false);
-
-  const cellRenderCurrencyFail = (params) => {
-    return (
-      <div style={{ color: "red" }}>{currencyFormatter(params.value)}</div>
-    );
-  };
-
-  const cellRenderCurrencyPass = (params) => {
-    return (
-      <div style={{ color: "green" }}>{currencyFormatter(params.value)}</div>
-    );
-  };
-
-  function currencyFormatter(num) {
-    return formatNumber(num) + "$";
-  }
-
-  function formatNumber(number) {
-    return Math.floor(number)
-      .toString()
-      .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-  }
 
   const toggleColumns = () => {
     setHideColumn((prev) => !prev);
@@ -64,8 +64,22 @@ const App: React.FC = () => {
         {
           headerName: "Car",
           children: [
-            { field: "type", width: 100 },
-            { field: "model", width: 200, hide: hideColumn },
+            {
+              field: "type",
+              width: 150,
+              cellEditor: "agSelectCellEditor",
+              cellEditorParams: {
+                values: carsList,
+              },
+              cellEditorPopup: true,
+              cellEditorPopupPosition: "under",
+              editable: true,
+            },
+            {
+              field: "model",
+              width: 200,
+              hide: hideColumn,
+            },
           ],
         },
         {
